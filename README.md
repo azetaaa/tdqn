@@ -57,6 +57,11 @@ To install Stable Baselines3 contrib `master` version:
 pip install git+https://github.com/Stable-Baselines-Team/stable-baselines3-contrib
 ```
 
+To install this Stable Baselines3 contrib `master` version:
+```
+pip install git+https://github.com/zappavignandrea/stable-baselines3-contrib
+```
+
 ## How To Contribute
 
 If you want to contribute, please read [**CONTRIBUTING.md**](./CONTRIBUTING.md) guide first.
