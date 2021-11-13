@@ -17,7 +17,7 @@ class BDQN(OffPolicyAlgorithm):
     """
     Branching Deep Q-Network (BDQN)
 
-    Built upon Stable Baselines 3  Deep Q-Network (DQN)
+    Built upon Stable Baselines 3 Deep Q-Network (DQN)
     Paper: https://arxiv.org/abs/1312.5602, https://www.nature.com/articles/nature14236
     Default hyperparameters are taken from the nature paper,
     except for the optimizer and learning rate that were taken from Stable Baselines defaults.
@@ -124,7 +124,6 @@ class BDQN(OffPolicyAlgorithm):
         # Linear schedule will be defined in `_setup_model()`
         self.exploration_schedule = None
         self.q_net, self.q_net_target = None, None
-        self.debug = False
 
         if _init_setup_model:
             self._setup_model()
@@ -168,25 +167,14 @@ class BDQN(OffPolicyAlgorithm):
                 # Compute the next Q-values using the target network
                 next_q_values = self.q_net_target(replay_data.next_observations)
                 # Follow greedy policy: use the one with the highest value
-                next_q_values, _ = next_q_values.max(dim=2)
-                # Avoid potential broadcast issue
-                # next_q_values = next_q_values.reshape(-1, 1)
-
-                if self.debug:
-                    print(len(next_q_values), next_q_values)  # 1920 = 64*30
-                    print(len(replay_data.rewards), replay_data.rewards)  # 64
-                    print(len(replay_data.dones), replay_data.dones)  # 64
+                next_q_values, _ = next_q_values.max(dim=1)
 
                 # 1-step TD target
                 target_q_values = replay_data.rewards + (1 - replay_data.dones) * self.gamma * next_q_values
 
             # Get current Q-values estimates
             current_q_values = self.q_net(replay_data.observations)
-            current_q_values, _ = current_q_values.max(dim=2)
-
-            if self.debug:
-                print(len(current_q_values), current_q_values)
-                print(len(replay_data.actions), replay_data.actions)
+            current_q_values, _ = current_q_values.max(dim=1)
 
             # Retrieve the q-values for the actions from the replay buffer
             current_q_values = th.gather(current_q_values, dim=1, index=replay_data.actions.long())
@@ -237,7 +225,7 @@ class BDQN(OffPolicyAlgorithm):
         else:
             action, state = self.policy.predict(observation, state, mask, deterministic)
 
-        # Possibly rescale action
+        # Possibly rescale action tensor
         if action.shape[0] != 1:
             action = th.unsqueeze(th.tensor(action), 0)
             action = action.numpy()

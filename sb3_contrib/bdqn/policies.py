@@ -24,7 +24,6 @@ class QNetwork(BasePolicy):
     :param activation_fn: Activation function
     :param normalize_images: Whether to normalize images or not,
          dividing by 255.0 (True by default)
-    :param action_bins: Action space discretization
     """
 
     def __init__(
@@ -36,7 +35,6 @@ class QNetwork(BasePolicy):
             net_arch: Optional[List[int]] = None,
             activation_fn: Type[nn.Module] = nn.ReLU,
             normalize_images: bool = True,
-            action_bins: int = 3,
     ):
         super(QNetwork, self).__init__(
             observation_space,
@@ -47,7 +45,6 @@ class QNetwork(BasePolicy):
 
         if net_arch is None:
             net_arch = [128, 64]
-        hidden_dim = 64
 
         self.net_arch = net_arch
         self.activation_fn = activation_fn
@@ -57,7 +54,7 @@ class QNetwork(BasePolicy):
 
         # number of actions
         action_dim = self.action_space.shape[0]
-        action_bins = action_dim
+        hidden_dim = net_arch[-1]
 
         # avoid last layer (no activation) by setting output_dim to zero
         q_net = create_mlp(self.features_dim, 0, self.net_arch, self.activation_fn)
@@ -65,7 +62,7 @@ class QNetwork(BasePolicy):
 
         # add action branches
         self.value_head = nn.Linear(hidden_dim, 1)
-        self.adv_heads = nn.ModuleList([nn.Linear(hidden_dim, action_bins) for _ in range(action_dim)])
+        self.adv_heads = nn.ModuleList([nn.Linear(hidden_dim, action_dim) for _ in range(action_dim)])
 
     def forward(self, obs: th.Tensor) -> th.Tensor:
         """
