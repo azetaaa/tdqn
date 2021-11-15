@@ -1,13 +1,14 @@
-from typing import Optional
+from typing import Optional, Union
 
+import numpy as np
 import torch as th
 
 
 def quantile_huber_loss(
-    current_quantiles: th.Tensor,
-    target_quantiles: th.Tensor,
-    cum_prob: Optional[th.Tensor] = None,
-    sum_over_quantiles: bool = True,
+        current_quantiles: th.Tensor,
+        target_quantiles: th.Tensor,
+        cum_prob: Optional[th.Tensor] = None,
+        sum_over_quantiles: bool = True,
 ) -> th.Tensor:
     """
     The quantile-regression loss, as described in the QR-DQN and TQC papers.
@@ -34,7 +35,8 @@ def quantile_huber_loss(
             f"the batch size of target_quantiles ({target_quantiles.shape[0]})."
         )
     if current_quantiles.ndim not in (2, 3):
-        raise ValueError(f"Error: The dimension of current_quantiles ({current_quantiles.ndim}) needs to be either 2 or 3.")
+        raise ValueError(
+            f"Error: The dimension of current_quantiles ({current_quantiles.ndim}) needs to be either 2 or 3.")
 
     if cum_prob is None:
         n_quantiles = current_quantiles.shape[-1]
@@ -67,3 +69,31 @@ def quantile_huber_loss(
     else:
         loss = loss.mean()
     return loss
+
+
+def reshape_quantiles(
+        actions: th.Tensor,
+        batch_size: int,
+        n_quantiles: int,
+        device: Union[th.device, str] = "auto",
+) -> th.Tensor:
+    """
+    Utility function for compatibility with the above loss computation,
+    mandatory for continuous action spaces and therefore action-branching architecture compatibility
+
+    :param actions: current action estimate of next observation, must be (batch_size, action_dim)
+    :param batch_size: Minibatch size for each gradient update
+    :param n_quantiles: Number of quantiles
+    :param device: Device (cpu, cuda, ...) on which the code should be run.
+        Setting it to auto, the code will be run on the GPU if possible.
+    :return: the reshaped action tensor
+    """
+    # Make quantiles copies of actions
+    shape = np.ceil(n_quantiles / actions.size()[1]).astype('int')
+    retval = actions.repeat(1, shape)
+    # Reshape for tensor compatibility
+    index_range = th.range(0, n_quantiles - 1, dtype=th.int).to(device)
+    retval = th.index_select(retval, 1, index_range)
+    # Add singleton dimension
+    retval = retval[..., None].long()
+    return retval.reshape(batch_size, n_quantiles, 1)
