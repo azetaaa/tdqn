@@ -12,9 +12,9 @@ from stable_baselines3.common.envs import FakeImageEnv, IdentityEnv, IdentityEnv
 from stable_baselines3.common.utils import get_device
 from stable_baselines3.common.vec_env import DummyVecEnv
 
-from sb3_contrib import QRDQN, TQC
+from sb3_contrib import ARS, QRDQN, TQC, TRPO
 
-MODEL_LIST = [TQC, QRDQN]
+MODEL_LIST = [ARS, QRDQN, TQC, TRPO]
 
 
 def select_env(model_class: BaseAlgorithm) -> gym.Env:
@@ -266,6 +266,10 @@ def test_save_load_policy(tmp_path, model_class, policy_str):
     :param policy_str: (str) Name of the policy.
     """
     kwargs = dict(policy_kwargs=dict(net_arch=[16]))
+
+    if policy_str == "CnnPolicy" and model_class is ARS:
+        pytest.skip("ARS does not support CnnPolicy")
+
     if policy_str == "MlpPolicy":
         env = select_env(model_class)
     else:
@@ -275,6 +279,11 @@ def test_save_load_policy(tmp_path, model_class, policy_str):
             kwargs = dict(
                 buffer_size=250,
                 learning_starts=100,
+                policy_kwargs=dict(features_extractor_kwargs=dict(features_dim=32)),
+            )
+        else:
+            kwargs = dict(
+                n_steps=128,
                 policy_kwargs=dict(features_extractor_kwargs=dict(features_dim=32)),
             )
         env = FakeImageEnv(screen_height=40, screen_width=40, n_channels=2, discrete=model_class == QRDQN)
@@ -327,9 +336,11 @@ def test_save_load_policy(tmp_path, model_class, policy_str):
     if actor is not None:
         actor.save(tmp_path / "actor.pkl")
 
+    device = policy.device
+
     del policy, actor
 
-    policy = policy_class.load(tmp_path / "policy.pkl")
+    policy = policy_class.load(tmp_path / "policy.pkl").to(device)
     if actor_class is not None:
         actor = actor_class.load(tmp_path / "actor.pkl")
 
