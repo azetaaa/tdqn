@@ -18,8 +18,6 @@ Over the span of stable-baselines and stable-baselines3, the community has been 
 However sometimes these utilities were too niche to be considered for stable-baselines or proved to be too difficult to integrate well into the existing code without creating a mess. sb3-contrib aims to fix this by not requiring the neatest code integration with existing code and not setting limits on what is too niche: almost everything remotely useful goes!
 We hope this allows us to provide reliable implementations following stable-baselines usual standards (consistent style, documentation, etc) beyond the relatively small scope of utilities in the main repository.
 
-
-
 ## Features
 
 See documentation for the full list of included features.
@@ -31,6 +29,14 @@ See documentation for the full list of included features.
 **Gym Wrappers**:
 - [Time Feature Wrapper](https://arxiv.org/abs/1712.00378)
 
+## Fork Additions
+
+**RL Algorithms**:
+- [Branching DQN (BDQN)](https://arxiv.org/abs/1711.08946)
+- Quantile Regression Branching DQN (QR-BDQN)
+
+**Features**:
+- [Noisy Networks for Exploration](https://arxiv.org/abs/1706.10295)
 
 ## Documentation
 
