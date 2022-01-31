@@ -2,6 +2,7 @@ import time
 from collections import deque
 from typing import Any, Dict, Optional, Tuple, Type, Union
 
+import gym
 import numpy as np
 import torch as th
 from gym import spaces
@@ -14,7 +15,7 @@ from stable_baselines3.common.utils import explained_variance, get_schedule_fn, 
 from stable_baselines3.common.vec_env import VecEnv
 from torch.nn import functional as F
 
-from sb3_contrib.common.maskable.buffers import MaskableRolloutBuffer
+from sb3_contrib.common.maskable.buffers import MaskableDictRolloutBuffer, MaskableRolloutBuffer
 from sb3_contrib.common.maskable.policies import MaskableActorCriticPolicy
 from sb3_contrib.common.maskable.utils import get_action_masks, is_masking_supported
 
@@ -127,6 +128,10 @@ class MaskablePPO(OnPolicyAlgorithm):
         self._setup_lr_schedule()
         self.set_random_seed(self.seed)
 
+        buffer_cls = (
+            MaskableDictRolloutBuffer if isinstance(self.observation_space, gym.spaces.Dict) else MaskableRolloutBuffer
+        )
+
         self.policy = self.policy_class(
             self.observation_space,
             self.action_space,
@@ -138,7 +143,7 @@ class MaskablePPO(OnPolicyAlgorithm):
         if not isinstance(self.policy, MaskableActorCriticPolicy):
             raise ValueError("Policy must subclass MaskableActorCriticPolicy")
 
-        self.rollout_buffer = MaskableRolloutBuffer(
+        self.rollout_buffer = buffer_cls(
             self.n_steps,
             self.observation_space,
             self.action_space,
@@ -288,7 +293,9 @@ class MaskablePPO(OnPolicyAlgorithm):
             collected, False if callback terminated rollout prematurely.
         """
 
-        assert isinstance(rollout_buffer, MaskableRolloutBuffer), "RolloutBuffer doesn't support action masking"
+        assert isinstance(
+            rollout_buffer, (MaskableRolloutBuffer, MaskableDictRolloutBuffer)
+        ), "RolloutBuffer doesn't support action masking"
         assert self._last_obs is not None, "No previous observation was provided"
         # Switch to eval mode (this affects batch norm / dropout)
         self.policy.set_training_mode(False)
@@ -329,6 +336,19 @@ class MaskablePPO(OnPolicyAlgorithm):
                 # Reshape in case of discrete action
                 actions = actions.reshape(-1, 1)
 
+            # Handle timeout by bootstraping with value function
+            # see GitHub issue #633
+            for idx, done in enumerate(dones):
+                if (
+                    done
+                    and infos[idx].get("terminal_observation") is not None
+                    and infos[idx].get("TimeLimit.truncated", False)
+                ):
+                    terminal_obs = self.policy.obs_to_tensor(infos[idx]["terminal_observation"])[0]
+                    with th.no_grad():
+                        terminal_value = self.policy.predict_values(terminal_obs)[0]
+                    rewards[idx] += self.gamma * terminal_value
+
             rollout_buffer.add(
                 self._last_obs,
                 actions,
@@ -343,11 +363,9 @@ class MaskablePPO(OnPolicyAlgorithm):
 
         with th.no_grad():
             # Compute value for the last timestep
-            obs_tensor = obs_as_tensor(new_obs, self.device)
-
             # Masking is not needed here, the choice of action doesn't matter.
             # We only want the value of the current observation.
-            _, values, _ = self.policy.forward(obs_tensor)
+            values = self.policy.predict_values(obs_as_tensor(new_obs, self.device))
 
         rollout_buffer.compute_returns_and_advantage(last_values=values, dones=dones)
 
@@ -358,11 +376,11 @@ class MaskablePPO(OnPolicyAlgorithm):
     def predict(
         self,
         observation: np.ndarray,
-        state: Optional[np.ndarray] = None,
-        mask: Optional[np.ndarray] = None,
+        state: Optional[Tuple[np.ndarray, ...]] = None,
+        episode_start: Optional[np.ndarray] = None,
         deterministic: bool = False,
         action_masks: Optional[np.ndarray] = None,
-    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    ) -> Tuple[np.ndarray, Optional[Tuple[np.ndarray, ...]]]:
         """
         Get the model's action(s) from an observation.
 
@@ -373,7 +391,7 @@ class MaskablePPO(OnPolicyAlgorithm):
         :param action_masks: Action masks to apply to the action distribution.
         :return: the model's action and the next state (used in recurrent policies)
         """
-        return self.policy.predict(observation, state, mask, deterministic, action_masks=action_masks)
+        return self.policy.predict(observation, state, episode_start, deterministic, action_masks=action_masks)
 
     def train(self) -> None:
         """
@@ -534,7 +552,7 @@ class MaskablePPO(OnPolicyAlgorithm):
 
             # Display training infos
             if log_interval is not None and iteration % log_interval == 0:
-                fps = int(self.num_timesteps / (time.time() - self.start_time))
+                fps = int((self.num_timesteps - self._num_timesteps_at_start) / (time.time() - self.start_time))
                 self.logger.record("time/iterations", iteration, exclude="tensorboard")
                 if len(self.ep_info_buffer) > 0 and len(self.ep_info_buffer[0]) > 0:
                     self.logger.record("rollout/ep_rew_mean", safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer]))

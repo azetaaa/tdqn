@@ -3,18 +3,58 @@
 Changelog
 ==========
 
-Release 1.2.1a2 (WIP)
+
+Release 1.4.0 (2022-01-19)
+-------------------------------
+**Add Trust Region Policy Optimization (TRPO)  and Augmented Random Search (ARS) algorithms**
+
+Breaking Changes:
+^^^^^^^^^^^^^^^^^
+- Dropped python 3.6 support
+- Upgraded to Stable-Baselines3 >= 1.4.0
+- ``MaskablePPO`` was updated to match latest SB3 ``PPO`` version (timeout handling and new method for the policy object)
+
+New Features:
+^^^^^^^^^^^^^
+- Added ``TRPO`` (@cyprienc)
+- Added experimental support to train off-policy algorithms with multiple envs (note: ``HerReplayBuffer`` currently not supported)
+- Added Augmented Random Search (ARS) (@sgillen)
+
+Bug Fixes:
+^^^^^^^^^^
+
+Deprecations:
+^^^^^^^^^^^^^
+
+Others:
+^^^^^^^
+- Improve test coverage for ``MaskablePPO``
+
+
+Documentation:
+^^^^^^^^^^^^^^
+
+Release 1.3.0 (2021-10-23)
 -------------------------------
 
-**Invalid action masking for PPO**
+**Add Invalid action masking for PPO**
+
+.. warning::
+
+  This version will be the last one supporting Python 3.6 (end of life in Dec 2021).
+  We highly recommended you to upgrade to Python >= 3.7.
+
 
 Breaking Changes:
 ^^^^^^^^^^^^^^^^^
 - Removed ``sde_net_arch``
+- Upgraded to Stable-Baselines3 >= 1.3.0
 
 New Features:
 ^^^^^^^^^^^^^
 - Added ``MaskablePPO`` algorithm (@kronion)
+- ``MaskablePPO`` Dictionary Observation support (@glmcdona)
+
 
 Bug Fixes:
 ^^^^^^^^^^
@@ -38,9 +78,6 @@ Release 1.2.0 (2021-09-08)
 Breaking Changes:
 ^^^^^^^^^^^^^^^^^
 - Upgraded to Stable-Baselines3 >= 1.2.0
-
-New Features:
-^^^^^^^^^^^^^
 
 Bug Fixes:
 ^^^^^^^^^^
@@ -185,4 +222,4 @@ Stable-Baselines3 is currently maintained by `Antonin Raffin`_ (aka `@araffin`_)
 Contributors:
 -------------
 
-@ku2482 @guyk1971 @minhlong94 @ayeright @kronion
+@ku2482 @guyk1971 @minhlong94 @ayeright @kronion @glmcdona @cyprienc @sgillen
