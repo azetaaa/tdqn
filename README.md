@@ -1,94 +1,27 @@
-<img src="docs/\_static/img/logo.png" align="right" width="40%"/>
+# Trading Deep-Q Network (TDQN)
 
-[![CI](https://github.com/Stable-Baselines-Team/stable-baselines3-contrib/workflows/CI/badge.svg)](https://github.com/Stable-Baselines-Team/stable-baselines3-contrib/actions) [![codestyle](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+The project is part of my Master’s Degree Thesis "Exploration Techniques for a Deep Reinforcement Learning Trading Agent".
 
-# Stable-Baselines3 - Contrib (SB3-Contrib)
+### What is this repository
 
-Contrib package for [Stable-Baselines3](https://github.com/DLR-RM/stable-baselines3) - Experimental reinforcement learning (RL) code.
-"sb3-contrib" for short.
+Fork of [SB3-Contrib](https://github.com/Stable-Baselines-Team/stable-baselines3-contrib), which is an extra package for [Stable-Baselines3](https://github.com/DLR-RM/stable-baselines3).
 
-### What is SB3-Contrib?
-
-A place for RL algorithms and tools that are considered experimental, e.g. implementations of the latest publications. Goal is to keep the simplicity, documentation and style of stable-baselines3 but for less matured implementations.
-
-### Why create this repository?
-
-Over the span of stable-baselines and stable-baselines3, the community has been eager to contribute in form of better logging utilities, environment wrappers, extended support (e.g. different action spaces) and learning algorithms.
-
-However sometimes these utilities were too niche to be considered for stable-baselines or proved to be too difficult to integrate well into the existing code without creating a mess. sb3-contrib aims to fix this by not requiring the neatest code integration with existing code and not setting limits on what is too niche: almost everything remotely useful goes!
-We hope this allows us to provide reliable implementations following stable-baselines usual standards (consistent style, documentation, etc) beyond the relatively small scope of utilities in the main repository.
-
-## Features
-
-See documentation for the full list of included features.
-
-**RL Algorithms**:
-- [Truncated Quantile Critics (TQC)](https://arxiv.org/abs/2005.04269)
-- [Quantile Regression DQN (QR-DQN)](https://arxiv.org/abs/1710.10044)
-- [PPO with invalid action masking (MaskablePPO)](https://arxiv.org/abs/2006.14171)
-- [Trust Region Policy Optimization (TRPO)](https://arxiv.org/abs/1502.05477)
-- [Augmented Random Search (ARS)](https://arxiv.org/abs/1803.07055)
-
-**Gym Wrappers**:
-- [Time Feature Wrapper](https://arxiv.org/abs/1712.00378)
 
 ## Fork Additions
 
 **RL Algorithms**:
 - [Branching DQN (BDQN)](https://arxiv.org/abs/1711.08946)
 - Quantile Regression Branching DQN (QR-BDQN)
+- Trading DQN (TDQN)
 
 **Features**:
 - [Noisy Networks for Exploration](https://arxiv.org/abs/1706.10295)
 
-## Documentation
-
-Documentation is available online: [https://sb3-contrib.readthedocs.io/](https://sb3-contrib.readthedocs.io/)
-
 
 ## Installation
 
-To install Stable Baselines3 contrib with pip, execute:
-
+To install this repository:
 ```
-pip install sb3-contrib
+pip install git+https://github.com/zappavignandrea/tdqn
 ```
-
-We recommend to use the `master` version of [Stable Baselines3](https://github.com/DLR-RM/stable-baselines3/).
-
-To install Stable Baselines3 `master` version:
-```
-pip install git+https://github.com/DLR-RM/stable-baselines3
-```
-
-To install Stable Baselines3 contrib `master` version:
-```
-pip install git+https://github.com/Stable-Baselines-Team/stable-baselines3-contrib
-```
-
-To install this Stable Baselines3 contrib `master` version:
-```
-pip install git+https://github.com/zappavignandrea/stable-baselines3-contrib
-```
-
-## How To Contribute
-
-If you want to contribute, please read [**CONTRIBUTING.md**](./CONTRIBUTING.md) guide first.
-
-
-## Citing the Project
-
-To cite this repository in publications (please cite SB3 directly):
-
-```bibtex
-@article{stable-baselines3,
-  author  = {Antonin Raffin and Ashley Hill and Adam Gleave and Anssi Kanervisto and Maximilian Ernestus and Noah Dormann},
-  title   = {Stable-Baselines3: Reliable Reinforcement Learning Implementations},
-  journal = {Journal of Machine Learning Research},
-  year    = {2021},
-  volume  = {22},
-  number  = {268},
-  pages   = {1-8},
-  url     = {http://jmlr.org/papers/v22/20-1364.html}
-}
-```
+A Conda environment file is also available for manual installation.
