@@ -15,7 +15,7 @@ having weights with greater uncertainty introduces more variability into the dec
 
 The name Trading Deep-Q Network (TDQN) is only introduced for the sake of clarity and convenience.
 The algorithm ultimately is a Quantile Regression Branching Deep Q-Network agent with noisy linear layers.
-For a more detailed explanation read the full project [report](report.pdf).
+For a more detailed explanation a full project report is available, pm for more details.
 
 ### Experimental results
 | | TDQN | DDPG | PPO | A2C | DJIA |
@@ -56,7 +56,7 @@ As such, we plan to integrate these solutions with more advanced models like [IQ
 
 To install this repository:
 ```
-pip install git+https://github.com/zappavignandrea/tdqn
+pip install git+https://github.com/azetaaa/tdqn
 ```
 A Conda environment file is also available for manual installation [here](environment.yml).
 
@@ -64,12 +64,12 @@ A Conda environment file is also available for manual installation [here](enviro
 Feel free to use this code for your own projects or research. Please cite this repository:
 ```
 @misc{tdqn2022,
-  author = {Zappavigna, Andrea},
+  author = {azetaaa},
   title = {Trading Deep-Q Network},
   year = {2022},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {\url{https://github.com/zappavignandrea/tdqn}},
+  howpublished = {\url{https://github.com/azetaaa/tdqn}},
 }
 ```
 
